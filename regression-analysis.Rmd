@@ -1,0 +1,78 @@
+---
+title: "BMI6106-RegressionAnalysis"
+author: "Kolton Hauck"
+date: '2023-03-27'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+setwd("/Users/Hauck/Desktop/BMI/BMI6106/BMI6106_final_project/BMI-6106-STATISTICS-PROJECT-2023/")
+
+library(fastDummies)
+library(tidyverse)
+
+full = read.csv("final_dataset.csv")
+```
+
+## set up dataset - No locations / dummy vars
+
+```{r}
+sir_scores = c("HAI_1_SIR", "HAI_2_SIR", "HAI_3_SIR", "HAI_4_SIR", "HAI_5_SIR", "HAI_6_SIR")
+
+df <- full %>%
+  select(!c("Facility.Name", "Facility.ID", "Address", "Phone.Number")) %>% #remove unimportant information
+  select(!c("City", "State", "ZIP.Code", "County.Name")) #remove locations
+
+#define dummy cols
+dummy_cols = c("Hospital.Type", 
+                     "Hospital.Ownership",
+                     "Emergency.Services",
+                     "Meets.criteria.for.promoting.interoperability.of.EHRs")
+#add in dummy cols
+#df <- dummy_cols(df, select_columns = dummy_cols, ignore_na = TRUE, remove_first_dummy = TRUE)
+df <- dummy_cols(df, select_columns = dummy_cols, ignore_na = TRUE)
+
+#remove original cols
+df <- df %>%
+  select(!dummy_cols) %>%
+  round(3)    #round SIR scores
+```
+
+### All features Multiple Regression - No changes
+
+```{r}
+mod1 <- df %>%
+  select(!c("HAI_2_SIR", "HAI_3_SIR", "HAI_4_SIR", "HAI_5_SIR", "HAI_6_SIR")) %>%
+  lm(formula = HAI_1_SIR ~ ., na.action = na.omit)
+
+summary(mod1)
+```
+
+### All features Multiple Regression - Filter for 0 values
+
+```{r}
+mod1 <- df %>%
+  filter(HAI_1_SIR != 0) %>%
+  select(!c("HAI_2_SIR", "HAI_3_SIR", "HAI_4_SIR", "HAI_5_SIR", "HAI_6_SIR")) %>%
+  lm(formula = HAI_1_SIR ~ ., na.action = na.omit)
+
+summary(mod1)
+```
+
+### All features Multiple Regression - Filter for 0 values and remove some cols
+
+```{r}
+mod1 <- df %>%
+  select(!c("MORT.Group.Measure.Count", "Safety.Group.Measure.Count","READM.Group.Measure.Count", "Pt.Exp.Group.Measure.Count",
+            "TE.Group.Measure.Count", "Count.of.Facility.MORT.Measures", "Count.of.Facility.Safety.Measures",
+            "Count.of.Facility.READM.Measures", "Count.of.Facility.Pt.Exp.Measures")) %>%
+  filter(HAI_1_SIR != 0) %>%
+  select(!c("HAI_2_SIR", "HAI_3_SIR", "HAI_4_SIR", "HAI_5_SIR", "HAI_6_SIR")) %>%
+  lm(formula = HAI_1_SIR ~ ., na.action = na.omit)
+
+summary(mod1)
+```
+
+
