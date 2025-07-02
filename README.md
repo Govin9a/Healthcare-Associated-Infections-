@@ -1,4 +1,5 @@
-# BMI6106 Prob & Stats Project
+# Healthcare Associated Infections
+
 
 ## Healthcare-Associated Infections
 
